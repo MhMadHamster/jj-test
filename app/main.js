@@ -45,6 +45,9 @@ class App extends Component {
             sortFlag: true
         };
     }
+    // обработчик клика на label
+    // если есть активные лейблы показывать новости с ними
+    // иначе показывать все новости
     handleLabel(label) {
         let {activeLabels, visibleLabels} = this.state;
         if(activeLabels.indexOf(label) === -1) activeLabels.push(label);
@@ -56,9 +59,11 @@ class App extends Component {
             visibleLabels: visibleLabels
         });
     }
+    // переключение сортировки по дате
     handleSort() {
         this.setState({sortFlag: !this.state.sortFlag});
     }
+    // фильтрация новостей
     filterNews(arrNews) {
         return arrNews.filter(newsItem => this.state.activeLabels.every(labelElm => 
             newsItem.labels.includes(labelElm))).sort((a, b) => 
