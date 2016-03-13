@@ -1,0 +1,32 @@
+{
+  "name": "jj-test",
+  "version": "0.0.1",
+  "description": "jj-test",
+  "main": "index.html",
+  "scripts": {
+    "server-hot": "webpack-dev-server --hot --inline",
+    "bundle-min": "webpack -p"
+  },
+  "author": "mhmad.hamster@gmail.com",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^6.3.3",
+    "babel-core": "^6.7.2",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.6.0",
+    "babel-preset-react": "^6.5.0",
+    "classnames": "^2.2.3",
+    "css-loader": "^0.23.1",
+    "cssnext": "^1.8.4",
+    "postcss-clearfix": "^1.0.0",
+    "postcss-import": "^8.0.2",
+    "postcss-loader": "^0.8.2",
+    "postcss-normalize": "^0.1.2",
+    "precss": "^1.4.0",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "style-loader": "^0.13.0",
+    "webpack": "^1.12.14",
+    "webpack-dev-server": "^1.14.1"
+  }
+}
