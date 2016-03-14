@@ -88,6 +88,9 @@ class App extends Component {
                     <div className={styles.newsContent}>
                         <h2>{news.title}</h2>
                         <p>{news.text}</p>
+                        <div className={styles.newsLabels}>
+                            {news.labels.map((label, i) => { return <span key={i}>{label}</span>})}
+                        </div>
                     </div>
                 </div>
             })}
