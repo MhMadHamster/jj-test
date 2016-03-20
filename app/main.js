@@ -1,5 +1,6 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import { createStore } from 'redux';
 import classNames from 'classnames/bind';
 
 import styles from './styles/styles.css';
@@ -28,58 +29,83 @@ const someJson = [
 
 ];
 
+let arrLabels = [];
+someJson.map(news => 
+    news.labels.map(label =>
+        arrLabels.indexOf(label) === -1 ? arrLabels.push(label) : ''
+    )
+);
+
+const initialState = {
+    news: someJson,
+    labels: arrLabels,
+    activeLabels: [],
+    sortFlag: true
+}
+
+const reducer = (state = initialState, action) => {
+    switch (action.type) {
+        case 'TOGGLE_LABEL':
+            let activeLabels = state.activeLabels;
+            if (activeLabels.includes(action.labelName)) {
+                activeLabels.splice(activeLabels.indexOf(action.labelName), 1);
+            } else {
+                activeLabels.push(action.labelName);
+            }
+            return {
+                ...state,
+                activeLabels: activeLabels
+            };
+        case 'SORT_DATE':
+            return {
+                ...state,
+                sortFlag: !state.sortFlag
+            };
+        default:
+            return state;
+    }
+};
+
+const store = createStore(reducer);
+
 class App extends Component {
     constructor(props) {
         super(props);
-        let labels = [];
-        props.data.map((news) => {
-            news.labels.map(label => {
-                labels.indexOf(label) === -1 ? labels.push(label) : '';
-            });
-        });
-        this.state = {
-            news: props.data,
-            labels: labels,
-            activeLabels: [],
-            visibleLabels: labels,
-            sortFlag: true
-        };
-    }
-    // обработчик клика на label
-    // если есть активные лейблы показывать новости с ними
-    // иначе показывать все новости
-    handleLabel(label) {
-        let {activeLabels, visibleLabels} = this.state;
-        if(activeLabels.indexOf(label) === -1) activeLabels.push(label);
-        else activeLabels.splice(activeLabels.indexOf(label), 1);
-        if (activeLabels.length) visibleLabels = activeLabels;
-        else visibleLabels = this.state.labels;
-        this.setState({
-            activeLabels: activeLabels,
-            visibleLabels: visibleLabels
-        });
-    }
-    // переключение сортировки по дате
-    handleSort() {
-        this.setState({sortFlag: !this.state.sortFlag});
     }
     // фильтрация новостей
     filterNews(arrNews) {
-        return arrNews.filter(newsItem => this.state.activeLabels.every(labelElm => 
-            newsItem.labels.includes(labelElm))).sort((a, b) => 
-            {return this.state.sortFlag ? Date.parse(a.date) < Date.parse(b.date) : Date.parse(a.date) > Date.parse(b.date)});
+        if (!this.props.activeLabels.length) {
+            return arrNews;
+        }
+
+        return arrNews.filter(newsItem => {
+            return this.props.activeLabels.every(label => {
+                return  newsItem.labels.includes(label);
+            });
+        }).sort((a, b) => {
+            return this.props.sortFlag ? Date.parse(a.date) < Date.parse(b.date) : Date.parse(a.date) > Date.parse(b.date)
+        });
     }
     render() {
-        const visibleNews = this.filterNews.call(this, this.state.news);
+        const visibleNews = this.filterNews.call(this, this.props.news);
         let dateClassName = cx({
             dateSort: true,
-            desc: this.state.sortFlag
+            desc: this.props.sortFlag
         });
         return (<div className={styles.container}>
             <div className={styles.topBar}>
-                <div onClick={this.handleSort.bind(this)} className={dateClassName}><span>Date</span></div>
+                <div onClick={() => {
+                    store.dispatch({
+                        type: 'SORT_DATE'
+                    })
+                }} className={dateClassName}><span>Date</span></div>
                 <ul className={styles.labelsList}>
-                    {this.state.labels.map((label, i) => <li className={this.state.activeLabels.indexOf(label) !== -1 ? styles.active : ''} key={i} onClick={this.handleLabel.bind(this, label)}>{label}</li>)}
+                    {this.props.labels.map((label, i) => <li className={this.props.activeLabels.includes(label) ? styles.active : ''} key={i} onClick={() => {
+                        store.dispatch({
+                            type: 'TOGGLE_LABEL',
+                            labelName: label
+                        })
+                    }}>{label}</li>)}
                 </ul>
             </div>
             {visibleNews.map((news, i) => {
@@ -98,7 +124,14 @@ class App extends Component {
     }
 }
 
-ReactDOM.render(
-    <App data={someJson} />,
-    document.getElementById('app')
-);
+const render = () => {
+    ReactDOM.render(
+        <App 
+            {...store.getState()}
+         />,
+        document.getElementById('app')
+    );
+}
+
+store.subscribe(render);
+render();
